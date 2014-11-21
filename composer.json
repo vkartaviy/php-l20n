@@ -1,5 +1,5 @@
 {
-    "name": "tisogawa/php-l20n",
+    "name": "vkartaviy/php-l20n",
     "description": "PHP port of Moizlla's L20n",
     "license": "Apache-2.0",
     "minimum-stability": "dev",
