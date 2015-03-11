@@ -94,7 +94,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(false);
         } catch (ParserException $e) {
             $this->assertTrue(true);
-            $this->assertEquals('Identifier has to start with [a-zA-Z_]', $e->getMessage());
+            $this->assertEquals('Identifier has to start with [a-zA-Z0-9_]', $e->getMessage());
         }
         // attribute id starting with an integer
         try {
@@ -102,7 +102,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(false);
         } catch (ParserException $e) {
             $this->assertTrue(true);
-            $this->assertEquals('Identifier has to start with [a-zA-Z_]', $e->getMessage());
+            $this->assertEquals('Unknown value type', $e->getMessage());
         }
         // attribute with no value
         try {
@@ -134,7 +134,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(false);
         } catch (ParserException $e) {
             $this->assertTrue(true);
-            $this->assertEquals('Identifier has to start with [a-zA-Z_]', $e->getMessage());
+            $this->assertEquals('Identifier has to start with [a-zA-Z0-9_]', $e->getMessage());
         }
         // integer value
         try {
@@ -163,10 +163,9 @@ class ParserTest extends PHPUnit_Framework_TestCase
         // integer id
         try {
             $this->parserToThrowOnErrors->parse('<id 2: "a">');
-            $this->assertTrue(false);
-        } catch (ParserException $e) {
             $this->assertTrue(true);
-            $this->assertEquals('Identifier has to start with [a-zA-Z_]', $e->getMessage());
+        } catch (ParserException $e) {
+            $this->assertTrue(false);
         }
         // no white space between attributes
         try {
@@ -287,7 +286,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(false);
         } catch (ParserException $e) {
             $this->assertTrue(true);
-            $this->assertEquals('Identifier has to start with [a-zA-Z_]', $e->getMessage());
+            $this->assertEquals('Identifier has to start with [a-zA-Z0-9_]', $e->getMessage());
         }
         // unescaped identifier in placeable, nested
         try {
@@ -295,7 +294,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(false);
         } catch (ParserException $e) {
             $this->assertTrue(true);
-            $this->assertEquals('Identifier has to start with [a-zA-Z_]', $e->getMessage());
+            $this->assertEquals('Identifier has to start with [a-zA-Z0-9_]', $e->getMessage());
         }
         // unescaped identifier in placeable, nested x2
         try {
@@ -303,7 +302,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(false);
         } catch (ParserException $e) {
             $this->assertTrue(true);
-            $this->assertEquals('Identifier has to start with [a-zA-Z_]', $e->getMessage());
+            $this->assertEquals('Identifier has to start with [a-zA-Z0-9_]', $e->getMessage());
         }
         // unescaped identifier in placeable, nested x2
         try {
@@ -311,7 +310,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(false);
         } catch (ParserException $e) {
             $this->assertTrue(true);
-            $this->assertEquals('Identifier has to start with [a-zA-Z_]', $e->getMessage());
+            $this->assertEquals('Identifier has to start with [a-zA-Z0-9_]', $e->getMessage());
         }
         // unescaped identifier in placeable, nested x3
         try {
@@ -319,7 +318,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(false);
         } catch (ParserException $e) {
             $this->assertTrue(true);
-            $this->assertEquals('Identifier has to start with [a-zA-Z_]', $e->getMessage());
+            $this->assertEquals('Identifier has to start with [a-zA-Z0-9_]', $e->getMessage());
         }
         // unescaped string in escaped placeable
         try {
@@ -335,7 +334,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(false);
         } catch (ParserException $e) {
             $this->assertTrue(true);
-            $this->assertEquals('Identifier has to start with [a-zA-Z_]', $e->getMessage());
+            $this->assertEquals('Identifier has to start with [a-zA-Z0-9_]', $e->getMessage());
         }
         // triple escaped placeable
         try {
@@ -719,7 +718,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             '<id {2}>',
             '<id {"a": "foo"}>',
             '<id {"a": \'foo\'}>',
-            '<id {2: "foo"}>',
+            // '<id {2: "foo"}>',
             '<id {a:"foo"b:"foo"}>',
             '<id {a }>',
             '<id {a: 2, b , c: 3 } >',
@@ -728,7 +727,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
         ];
         foreach ($strings as $string) {
             $ast = $this->parser->parse($string);
-            $this->assertEquals('JunkEntry', $ast['body'][0]['type']);
+            $this->assertEquals('JunkEntry', $ast['body'][0]['type'], $string);
         }
     }
 
@@ -875,8 +874,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
         // identifier errors
         $strings = [
             '<i`d "foo">',
-            '<0d "foo">',
-            '<09 "foo">',
+            //'<0d "foo">',
+            //'<09 "foo">',
             '<i!d "foo">',
         ];
         foreach ($strings as $string) {
@@ -1056,5 +1055,19 @@ class ParserTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(true);
             $this->assertTrue(strpos($e->getMessage(), 'Too many placeables') !== false);
         }
+    }
+
+    public function test_import()
+    {
+        $source = '
+import("translations/messages.en.l20n")
+
+<foo "bar">
+';
+
+        $ast = $this->parser->parse($source);
+
+        $this->assertEquals('ImportStatement', $ast['body'][0]['type']);
+        $this->assertEquals('translations/messages.en.l20n', $ast['body'][0]['uri']['content']);
     }
 }

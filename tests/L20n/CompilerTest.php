@@ -2780,7 +2780,7 @@ class CompilerTest extends PHPUnit_Framework_TestCase
             $env->index->getString();
             $this->assertTrue(false);
         } catch (CompilerException $e) {
-            $this->assertEquals('Index must be a string', $e->getMessage());
+            $this->assertEquals('Hash key lookup failed (tried "1").', $e->getMessage());
             $this->assertTrue(true);
         }
         try {
@@ -2832,7 +2832,7 @@ class CompilerTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(false);
         } catch (CompilerException $e) {
             $this->assertTrue(true);
-            $this->assertEquals('Index must be a string', $e->getMessage());
+            $this->assertEquals('Index must be a string or integer', $e->getMessage());
         }
         try {
             $env->indexMissing->getString();
@@ -3353,7 +3353,7 @@ class CompilerTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(false);
         } catch (CompilerException $e) {
             $this->assertTrue(true);
-            $this->assertEquals('Index must be a string', $e->getMessage());
+            $this->assertEquals('Hash key lookup failed (tried "1").', $e->getMessage());
         }
 
         // $nested (a dict-like ctxdata) and bools
@@ -3391,7 +3391,7 @@ class CompilerTest extends PHPUnit_Framework_TestCase
             $this->assertTrue(false);
         } catch (CompilerException $e) {
             $this->assertTrue(true);
-            $this->assertEquals('Index must be a string', $e->getMessage());
+            $this->assertEquals('Index must be a string or integer', $e->getMessage());
         }
 
         // $nested (a dict-like ctxdata) and undefined

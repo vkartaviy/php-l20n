@@ -57,8 +57,8 @@ class HashLiteral implements ExpressionInterface
             if ($key === null) {
                 continue;
             }
-            if (!is_string($key)) {
-                throw new IndexException('Index must be a string');
+            if (!is_string($key) && !is_integer($key)) {
+                throw new IndexException('Index must be a string or integer');
             }
             $keysTried[] = $key;
             if (isset($this->content[$key])) {

@@ -459,8 +459,8 @@ class Parser
         /** @var int $cc */
         $cc = ord(substr($source, $start, 1));
 
-        if (($cc < 97 || $cc > 122) && ($cc < 65 || $cc > 90) && $cc !== 95) {
-            throw new ParserException('Identifier has to start with [a-zA-Z_]');
+        if (($cc < 97 || $cc > 122) && ($cc < 65 || $cc > 90) && ($cc < 48 || $cc > 57) && $cc !== 95) {
+            throw new ParserException('Identifier has to start with [a-zA-Z0-9_]');
         }
 
         $index = $index + 1;

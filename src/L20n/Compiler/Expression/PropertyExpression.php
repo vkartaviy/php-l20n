@@ -42,7 +42,7 @@ class PropertyExpression implements ExpressionInterface
     public function __invoke(Locals $locals, \stdClass $ctxdata = null, $prop = null)
     {
         $prop = Expression::_resolve($this->property, $locals, $ctxdata);
-        if (!is_string($prop)) {
+        if (!is_string($prop) && !is_integer($prop)) {
             throw new RuntimeException(sprintf('Property name must evaluate to a string: %s', $prop));
         }
 
