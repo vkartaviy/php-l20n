@@ -55,11 +55,22 @@ class Compiler
 
     /**
      * @param GlobalBase[] $globals
-     * @return bool
      */
     public function setGlobals(array $globals)
     {
         static::$_globals = $globals;
-        return true;
+    }
+
+    public function registerGlobal(GlobalBase $global)
+    {
+        static::$_globals[$global->id] = $global;
+    }
+
+    public static function reset()
+    {
+        static::$_globals = [];
+        static::$_references = [
+            'globals' => []
+        ];
     }
 }

@@ -57,9 +57,15 @@ class CallExpression implements ExpressionInterface
         $locals = $macro[0];
         /** @var Macro $macro */
         $macro = $macro[1];
-        if (!$macro instanceof Macro) {
+        if ($macro instanceof Macro) {
+            return $macro->_call($evaluated_args, $ctxdata);
+        } elseif ($macro instanceof \Closure) {
+            /* @var $macro \Closure */
+            return [$locals, $macro(array_map(function ($arg) use ($ctxdata) {
+                return Expression::_resolve($arg[1], $arg[0], $ctxdata);
+            }, $evaluated_args))];
+        } else {
             throw new RuntimeException('Expected a macro, got a non-callable.');
         }
-        return $macro->_call($evaluated_args, $ctxdata);
     }
 }
