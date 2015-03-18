@@ -6,6 +6,7 @@ use L20n\Compiler\EntryInterface;
 use L20n\Compiler\Exception\RuntimeException;
 use L20n\Compiler;
 use L20n\Compiler\Locals;
+use L20n\Platform\GlobalBase;
 
 /**
  * Class Compiler\Expression\GlobalsExpression
@@ -16,14 +17,22 @@ class GlobalsExpression implements ExpressionInterface
     /** @var string */
     private $name = '';
 
+    /** @var GlobalBase */
+    private $global;
+
     /**
      * @param array $node
      * @param EntryInterface|null $entry
      * @param array|null $index
+     * @throws RuntimeException
      */
     public function __construct(array $node, EntryInterface $entry = null, array $index = null)
     {
         $this->name = $node['id']['name'];
+
+        if (isset($entry->globals->{$this->name})) {
+            $this->global = $entry->globals->{$this->name};
+        }
     }
 
     /**
@@ -35,21 +44,19 @@ class GlobalsExpression implements ExpressionInterface
      */
     public function __invoke(Locals $locals, \stdClass $ctxdata = null, $prop = null)
     {
+        if (!isset($this->global)) {
+            throw new RuntimeException(sprintf('Reference to an unknown global @%s', $this->name));
+        }
 
-        if (!Compiler::$_globals) {
-            throw new RuntimeException(sprintf('No globals set (tried @%s)', $this->name));
-        }
-        if (!isset(Compiler::$_globals[$this->name])) {
-            throw new RuntimeException(sprintf('Reference to an unknown global: %s', $this->name));
-        }
         /** @var mixed $value */
         $value = null;
+
         try {
-            $value = Compiler::$_globals[$this->name]->get();
+            $value = $this->global->get();
         } catch (\Exception $e) {
-            throw new RuntimeException(sprintf('Cannot evaluate global %s', $this->name));
+            throw new RuntimeException(sprintf('Cannot evaluate global @%s', $this->name));
         }
-        Compiler::$_references['globals'][$this->name] = true;
+
         return [$locals, $value];
     }
 }

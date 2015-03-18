@@ -30,8 +30,9 @@ class Attribute implements EntryInterface
      */
     public function __construct(array $node, Entity $entity)
     {
-        $this->key = $node['key']['name'];
+        $this->key   = $node['key']['name'];
         $this->local = isset($node['local']) ? $node['local'] : false;
+
         if (isset($node['index'])) {
             /** @var int $limit */
             $limit = count($node['index']);
@@ -39,11 +40,13 @@ class Attribute implements EntryInterface
                 $this->index[] = new IndexExpression($node['index'][$i], $this);
             }
         }
+
         if (isset($node['value']['type']) && $node['value']['type'] === 'String') {
             $this->value = $node['value']['content'];
         } else {
             $this->value = LazyExpression::factory($node['value'], $entity, $this->index);
         }
+
         $this->entity = $entity;
     }
 
@@ -57,9 +60,10 @@ class Attribute implements EntryInterface
     {
         try {
             /** @var Locals $locals */
-            $locals = new Locals();
+            $locals           = new Locals();
             $locals->__this__ = $this->entity;
-            $locals->__env__ = $this->entity->env;
+            $locals->__env__  = $this->entity->env;
+
             return Expression::_resolve($this->value, $locals, $ctxdata);
         } catch (CompilerException $e) {
             throw $e;

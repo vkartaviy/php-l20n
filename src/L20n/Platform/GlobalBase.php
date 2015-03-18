@@ -8,8 +8,6 @@ namespace L20n\Platform;
  */
 abstract class GlobalBase
 {
-    /** @var string|null */
-    public $id = null;
     /** @var mixed|null */
     public $value = null;
     /** @var bool */

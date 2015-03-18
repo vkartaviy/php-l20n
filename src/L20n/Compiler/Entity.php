@@ -17,6 +17,8 @@ class Entity implements EntryInterface
     public $id = '';
     /** @var \stdClass */
     public $env;
+    /** @var \stdClass */
+    public $globals;
     /** @var bool */
     public $local = false;
     /** @var IndexExpression[] */
@@ -32,21 +34,27 @@ class Entity implements EntryInterface
     /**
      * @param array $node
      * @param \stdClass $env
+     * @param \stdClass $globals
      */
-    public function __construct(array $node, \stdClass $env)
+    public function __construct(array $node, \stdClass $env, \stdClass $globals)
     {
-        $this->id = $node['id']['name'];
-        $this->env = $env;
-        $this->local = isset($node['local']) ? $node['local'] : false;
+        $this->id      = $node['id']['name'];
+        $this->env     = $env;
+        $this->globals = $globals;
+        $this->local   = isset($node['local']) ? $node['local'] : false;
+
         if (isset($node['index'])) {
             /** @var int $limit */
             $limit = count($node['index']);
+
             for ($i = 0; $i < $limit; $i++) {
                 $this->index[] = new IndexExpression($node['index'][$i], $this);
             }
         }
+
         if (isset($node['attrs'])) {
             $this->attributes = new \stdClass();
+
             foreach ($node['attrs'] as $attr) {
                 $this->attributes->{$attr['key']['name']} = new Attribute($attr, $this);
                 if (!$attr['local']) {
@@ -54,6 +62,7 @@ class Entity implements EntryInterface
                 }
             }
         }
+
         if (isset($node['value']['type']) && $node['value']['type'] === 'String') {
             $this->value = $node['value']['content'];
         } else {
@@ -71,9 +80,10 @@ class Entity implements EntryInterface
     {
         try {
             /** @var Locals $locals */
-            $locals = new Locals();
+            $locals           = new Locals();
             $locals->__this__ = $this;
-            $locals->__env__ = $this->env;
+            $locals->__env__  = $this->env;
+
             return Expression::_resolve($this->value, $locals, $ctxdata);
         } catch (CompilerException $e) {
             throw $e;
@@ -88,18 +98,19 @@ class Entity implements EntryInterface
      */
     public function get(\stdClass $ctxdata = null)
     {
-        Compiler::$_references['globals'] = [];
         /** @var \stdClass $entity */
-        $entity = new \stdClass();
-        $entity->value = $this->getString($ctxdata);
+        $entity             = new \stdClass();
+        $entity->value      = $this->getString($ctxdata);
         $entity->attributes = new \stdClass();
+
         if ($this->publicAttributes) {
             $entity->attributes = new \stdClass();
+
             foreach ($this->publicAttributes as $attr) {
                 $entity->attributes->$attr = $this->attributes->$attr->getString($ctxdata);
             }
         }
-        $entity->globals = Compiler::$_references['globals'];
+
         return $entity;
     }
 }

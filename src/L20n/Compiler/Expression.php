@@ -15,28 +15,28 @@ class Expression
     /** @var array */
     private static $EXPRESSION_TYPES = [
         // Primary expressions.
-        'Identifier' => 'Identifier',
-        'ThisExpression' => 'ThisExpression',
-        'VariableExpression' => 'VariableExpression',
-        'GlobalsExpression' => 'GlobalsExpression',
+        'Identifier'            => 'Identifier',
+        'ThisExpression'        => 'ThisExpression',
+        'VariableExpression'    => 'VariableExpression',
+        'GlobalsExpression'     => 'GlobalsExpression',
 
         // Value expressions.
-        'Number' => 'NumberLiteral',
-        'String' => 'StringLiteral',
-        'Hash' => 'HashLiteral',
-        // 'HashItem' => 'Expression',
-        'ComplexString' => 'ComplexString',
+        'Number'                => 'NumberLiteral',
+        'String'                => 'StringLiteral',
+        'Hash'                  => 'HashLiteral',
+        // 'HashItem'           => 'Expression',
+        'ComplexString'         => 'ComplexString',
 
         // Logical expressions.
-        'UnaryExpression' => 'UnaryExpression',
-        'BinaryExpression' => 'BinaryExpression',
-        'LogicalExpression' => 'LogicalExpression',
+        'UnaryExpression'       => 'UnaryExpression',
+        'BinaryExpression'      => 'BinaryExpression',
+        'LogicalExpression'     => 'LogicalExpression',
         'ConditionalExpression' => 'ConditionalExpression',
 
         // Member expressions.
-        'CallExpression' => 'CallExpression',
-        'PropertyExpression' => 'PropertyExpression',
-        'AttributeExpression' => 'AttributeExpression',
+        'CallExpression'        => 'CallExpression',
+        'PropertyExpression'    => 'PropertyExpression',
+        'AttributeExpression'   => 'AttributeExpression',
         'ParenthesisExpression' => 'ParenthesisExpression'
     ];
 
@@ -52,14 +52,18 @@ class Expression
         if (!$node) {
             return null;
         }
+
         if (!isset(static::$EXPRESSION_TYPES[$node['type']])) {
             throw new CompilationException(sprintf('Unknown expression type: %s', $node['type']));
         }
+
         if ($node['type'] === 'ParenthesisExpression') {
             return static::factory($node['expression'], $entry);
         }
+
         /** @var string $class */
         $class = sprintf('%s\\Expression\\%s', __NAMESPACE__, static::$EXPRESSION_TYPES[$node['type']]);
+
         return new $class($node, $entry, $index);
     }
 
@@ -74,6 +78,7 @@ class Expression
     {
         /** @var string $type_of_expression */
         $type_of_expression = gettype($expr);
+
         if ($type_of_expression === 'string' ||
             $type_of_expression === 'boolean' ||
             $type_of_expression === 'integer' ||
@@ -94,6 +99,7 @@ class Expression
             $locals = $current[0];
             /** @var mixed $current */
             $current = $current[1];
+
             return static::_resolve($current, $locals, $ctxdata);
         }
 

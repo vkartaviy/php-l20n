@@ -8,9 +8,6 @@ namespace L20n\Platform;
  */
 class HourGlobal extends GlobalBase
 {
-    /** @var string */
-    public $id = 'hour';
-
     /**
      * @return mixed
      */
@@ -18,6 +15,7 @@ class HourGlobal extends GlobalBase
     {
         /** @var \DateTime $time */
         $time = new \DateTime();
+
         return (int)$time->format('G');
     }
 }

@@ -12,9 +12,6 @@ class GlobalsTest extends PHPUnit_Framework_TestCase
     /** @var int */
     private $max_nesting_level_to_set = 200;
 
-    /**
-     *
-     */
     public function setUp()
     {
         // To avoid the fatal error of nested function caused by xdebug.
@@ -26,14 +23,9 @@ class GlobalsTest extends PHPUnit_Framework_TestCase
         $this->compiler = new Compiler();
     }
 
-    /**
-     *
-     */
     public function tearDown()
     {
         ini_set('xdebug.max_nesting_level', $this->max_nesting_level_to_set);
-
-        Compiler::reset();
     }
 
     public function test_global_callable()
@@ -42,11 +34,11 @@ class GlobalsTest extends PHPUnit_Framework_TestCase
 <foo "{{ @hour }}">
 <bar "{{ @test(12345) }}">
 ';
-
-        $this->compiler->registerGlobal(new TestGlobal());
+        $globals = new \stdClass();
+        $globals->test = new TestGlobal();
 
         $ast = $this->parser->parse($source);
-        $env = $this->compiler->compile($ast);
+        $env = $this->compiler->compile($ast, null, $globals);
 
         $this->assertEquals('12,345', $env->bar->getString());
     }
@@ -64,7 +56,7 @@ class GlobalsTest extends PHPUnit_Framework_TestCase
             $env->bar->getString();
             $this->assertTrue(false);
         } catch (\L20n\Compiler\Exception\ValueException $ex) {
-            $this->assertEquals('No globals set (tried @test)', $ex->getMessage());
+            $this->assertEquals('Reference to an unknown global @test', $ex->getMessage());
         }
     }
 }
