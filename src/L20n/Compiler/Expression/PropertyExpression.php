@@ -29,7 +29,7 @@ class PropertyExpression implements ExpressionInterface
     public function __construct(array $node, EntryInterface $entry = null, array $index = null)
     {
         $this->expression = Expression::factory($node['expression'], $entry);
-        $this->property = $node['computed'] ? Expression::factory($node['property'], $entry) : $node['property']['name'];
+        $this->property   = $node['computed'] ? Expression::factory($node['property'], $entry) : $node['property']['name'];
     }
 
     /**
@@ -52,30 +52,43 @@ class PropertyExpression implements ExpressionInterface
         $locals = $parent[0];
         /** @var EntryInterface|ExpressionInterface|\stdClass|array|null $parent */
         $parent = $parent[1];
+
         if (($parent instanceof Entity || $parent instanceof Attribute) && $parent->value !== null) {
             if (!is_callable($parent->value)) {
                 throw new RuntimeException(sprintf('Cannot get property of a %s: %s', gettype($parent->value), $prop));
             }
+
             return $parent->value->__invoke($locals, $ctxdata, $prop);
         }
+
         if ($parent instanceof ExpressionInterface) {
             return $parent($locals, $ctxdata, $prop);
         }
+
         if ($parent instanceof Macro) {
             throw new RuntimeException(sprintf('Cannot get property of a macro: %s', $prop));
         }
+
         if ($parent === null) {
             throw new RuntimeException(sprintf('Cannot get property of a null: %s', $prop));
         }
+
         if (is_array($parent)) {
-            throw new RuntimeException(sprintf('Cannot get property of an array: %s', $prop));
+            if (!array_key_exists($prop, $parent)) {
+                throw new RuntimeException(sprintf('Cannot get property of an array: %s', $prop));
+            }
+
+            return [$locals, $parent[$prop]];
         }
+
         if ($parent instanceof \stdClass) {
             if (!property_exists($parent, $prop)) {
                 throw new RuntimeException(sprintf('%s is not defined on the object.', $prop));
             }
+
             return [$locals, $parent->$prop];
         }
+
         throw new RuntimeException(sprintf('Cannot get property of a %s: %s', gettype($parent), $prop));
     }
 }
